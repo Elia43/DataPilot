@@ -42,6 +42,13 @@ _db:     Database    | None = None
 
 def _load_uri() -> str:
     """Read MONGO_URI from environment (populated by python-dotenv in config.py)."""
+    try:
+        import streamlit as st
+        if hasattr(st, 'secrets') and 'MONGO_URI' in st.secrets:
+            return st.secrets['MONGO_URI']
+    except Exception:
+        pass
+
     uri = os.environ.get("MONGO_URI", "").strip()
     if not uri or "<username>" in uri:
         raise EnvironmentError(
