@@ -1,44 +1,14 @@
-# --- Core LLM & Embeddings ---
-# Local LLM via Ollama REST API
-# Google Gemini API
-google-genai
+﻿google-genai
 google-generativeai
-
-# Local REST clients (used elsewhere)
 requests
-
-# --- RAG Orchestration ---
-langchain
-
-# --- Vector Store ---
 chromadb
-
-# --- PDF Parsing ---
 pymupdf
-
-# --- Audio Transcription ---
-faster-whisper
-
-# --- UI ---
 streamlit
-
-# --- ML / Risk Model ---
-scikit-learn
-xgboost
-
-# --- Utilities ---
 python-dotenv
-apscheduler
-
-# --- Database ---
 pymongo[srv]
 bcrypt
 certifi
-
-# --- Testing ---
 pytest
-
-# Data Science & Visualization
 plotly
 pandas
 numpy
