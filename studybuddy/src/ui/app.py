@@ -98,8 +98,8 @@ except Exception as _e:
     _WEAK_DB_AVAILABLE = False
 
 try:
-    from src.ui.admin_panel import render as _render_admin_panel
-    from src.db.mongo_client import is_admin as _is_admin
+    from studybuddy.src.ui.admin_panel import render as _render_admin_panel
+    from studybuddy.src.db.mongo_client import is_admin as _is_admin
     _ADMIN_AVAILABLE = True
 except Exception as _e:
     import traceback
