@@ -1583,6 +1583,7 @@ def _render_login_screen() -> None:
                             st.session_state.session_started = True
                             st.session_state.logged_in       = True
                             st.session_state.is_admin        = _ADMIN_AVAILABLE and _is_admin(user["username"])
+                            st.write(f"DEBUG is_admin: {st.session_state.get('is_admin')}")
                             _status.update(label="Signed in!", state="complete")
                             st.rerun()
                     except Exception as e:
@@ -2763,6 +2764,7 @@ def _save_current_chat() -> None:
 
 
 def _render_sidebar():
+    st.sidebar.write(f"ADMIN_AVAILABLE: {_ADMIN_AVAILABLE}")
     st.sidebar.title("📚 DataPilot")
     st.sidebar.caption("AI-Powered Virtual TA + Quiz Master")
 
