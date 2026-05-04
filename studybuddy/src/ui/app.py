@@ -97,6 +97,14 @@ except Exception as _e:
     print(f"[DataPilot] WARNING: weak_store import failed — flashcard features disabled. Reason: {_e}")
     _WEAK_DB_AVAILABLE = False
 
+try:
+    from src.ui.admin_panel import render as _render_admin_panel
+    from src.db.mongo_client import is_admin as _is_admin
+    _ADMIN_AVAILABLE = True
+except Exception as _e:
+    print(f"[DataPilot] WARNING: admin_panel import failed — admin features disabled. Reason: {_e}")
+    _ADMIN_AVAILABLE = False
+
 
 @st.cache_resource(show_spinner=False)
 def _get_chroma_collection(db_path: str):
@@ -321,6 +329,7 @@ def _init_session_state():
         "quiz_results":          None,
         "quiz_report_generated": False,
         "quiz_input_counter":    0,
+        "is_admin":              False,
         "quiz_difficulty":       "Medium",
         "quiz_num_questions":    DEFAULT_NUM_QUESTIONS,
         "quiz_source_filter":    [],   # empty = all sources
@@ -1305,7 +1314,7 @@ def _render_quiz_setup_wizard():
                 _checked_sources = []
                 for _i, _sf in enumerate(_all_sf):
                     _chk_key     = f"wiz_src_chk_{_i}"
-                    _default_val = (_sf in _prev_filter) if _prev_filter else True
+                    _default_val = True
                     # Use setdefault so we never pass both value= and a pre-set
                     # session-state key to the same widget (Streamlit raises a
                     # warning and causes unnecessary reruns when both are present).
@@ -1573,6 +1582,7 @@ def _render_login_screen() -> None:
                             st.session_state.student_name    = user["username"]
                             st.session_state.session_started = True
                             st.session_state.logged_in       = True
+                            st.session_state.is_admin        = _ADMIN_AVAILABLE and _is_admin(user["username"])
                             _status.update(label="Signed in!", state="complete")
                             st.rerun()
                     except Exception as e:
@@ -1744,6 +1754,33 @@ def _render_chat_page():
                         f'{meta.get("query_class","").upper()}</span>',
                         unsafe_allow_html=True,
                     )
+                    if meta.get("query_class") == "conceptual_help":
+                        _cits = meta.get("citations", [])
+                        if _cits:
+                            with st.expander("📚 Recommended Review"):
+                                for _cit in _cits[:3]:
+                                    _src = (
+                                        _cit.source_file
+                                        if hasattr(_cit, "source_file")
+                                        else _cit.get("source_file", "")
+                                    )
+                                    _pg = (
+                                        _cit.page_number
+                                        if hasattr(_cit, "page_number")
+                                        else _cit.get("page_number")
+                                    )
+                                    if _src and _pg and _pg != -1:
+                                        st.markdown(
+                                            f"📄 Re-read **{_src}** — page **{_pg}**"
+                                        )
+                                        st.caption(
+                                            f"Based on your question, review {_src} page {_pg} for more depth."
+                                        )
+                                    elif _src:
+                                        st.markdown(f"📄 Review **{_src}**")
+                                        st.caption(
+                                            f"Based on your question, review {_src} for more depth."
+                                        )
 
         # ── Thinking state: process pending query inline ────────────
         # This runs AFTER committed messages are rendered so the student
@@ -2756,6 +2793,17 @@ def _render_sidebar():
             st.session_state.page = page_name
             st.rerun()
 
+    if st.session_state.get("is_admin") and _ADMIN_AVAILABLE:
+        btn_type = "primary" if current_page == "Admin Panel" else "secondary"
+        if st.sidebar.button(
+            "🔐  Admin Panel",
+            use_container_width=True,
+            type=btn_type,
+            key="nav_Admin Panel",
+        ):
+            st.session_state.page = "Admin Panel"
+            st.rerun()
+
     st.sidebar.divider()
 
     # ── Knowledge Base ─────────────────────────────────────────────
@@ -2856,6 +2904,8 @@ def _render_page():
         _render_flashcard_page()
     elif page == "History":
         _render_history_page()
+    elif page == "Admin Panel" and st.session_state.get("is_admin") and _ADMIN_AVAILABLE:
+        _render_admin_panel()
 
 
 # ══════════════════════════════════════════════════════════════════

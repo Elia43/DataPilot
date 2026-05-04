@@ -159,3 +159,48 @@ def ping() -> bool:
         return True
     except Exception:
         return False
+
+
+def is_admin(username: str) -> bool:
+    """Return True if the user document has role='admin'."""
+    try:
+        user = _connect()[USERS_COLLECTION].find_one(
+            {"username": username.strip().lower()},
+            {"role": 1},
+        )
+        return bool(user and user.get("role") == "admin")
+    except Exception:
+        return False
+
+
+def create_admin_user(username: str, password: str) -> dict:
+    """
+    Create a user with role='admin'.
+    Raises ValueError if the username already exists or inputs are invalid.
+    """
+    import bcrypt
+    from datetime import datetime, timezone
+    from pymongo.errors import DuplicateKeyError
+
+    username = username.strip().lower()
+    if len(username) < 3:
+        raise ValueError("Username must be at least 3 characters.")
+    if len(password) < 6:
+        raise ValueError("Password must be at least 6 characters.")
+
+    password_hash = bcrypt.hashpw(
+        password.encode("utf-8"), bcrypt.gensalt()
+    ).decode("utf-8")
+
+    doc = {
+        "username":      username,
+        "password_hash": password_hash,
+        "role":          "admin",
+        "created_at":    datetime.now(timezone.utc),
+    }
+    try:
+        result     = _connect()[USERS_COLLECTION].insert_one(doc)
+        doc["_id"] = result.inserted_id
+        return doc
+    except DuplicateKeyError:
+        raise ValueError(f"Username '{username}' already exists.")
