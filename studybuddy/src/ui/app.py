@@ -102,7 +102,8 @@ try:
     from src.db.mongo_client import is_admin as _is_admin
     _ADMIN_AVAILABLE = True
 except Exception as _e:
-    print(f"[DataPilot] WARNING: admin_panel import failed — admin features disabled. Reason: {_e}")
+    import traceback
+    traceback.print_exc()
     _ADMIN_AVAILABLE = False
 
 

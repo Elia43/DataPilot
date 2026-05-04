@@ -10,15 +10,17 @@ Public API:
 
 import sys
 from pathlib import Path
+_SRC_DIR = Path(__file__).resolve().parent.parent   # studybuddy/src/
+_PKG_DIR = _SRC_DIR.parent                          # studybuddy/
+for _p in [str(_SRC_DIR), str(_PKG_DIR)]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 from datetime import datetime, timezone, timedelta
 
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-
-_UI_DIR  = Path(__file__).resolve().parent
-_PKG_DIR = _UI_DIR.parent.parent
-sys.path.insert(0, str(_PKG_DIR))
 
 from src.db.mongo_client import (
     get_users_collection,
