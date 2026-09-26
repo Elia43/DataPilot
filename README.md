@@ -160,8 +160,8 @@ ChromaDB HNSW retrieval averages under 5ms. Embedding and generation times refle
 | Metric | Score | Interpretation |
 |---|---|---|
 | Answer Relevancy | 0.97 / 1.0 | Excellent |
-| Faithfulness | 0.64 / 1.0 | Good |
-| Context Precision | 0.48 / 1.0 | Acceptable |
+| Faithfulness | 0.77 / 1.0 | Good |
+| Context Precision | 0.52 / 1.0 | Acceptable |
 
 ---
 
