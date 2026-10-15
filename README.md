@@ -157,11 +157,17 @@ ChromaDB HNSW retrieval averages under 5ms. Embedding and generation times refle
 
 **RAG Quality Evaluation (20 questions, Introduction to Big Data course)**
 
-| Metric | Score | Interpretation |
-|---|---|---|
-| Answer Relevancy | 0.97 / 1.0 | Excellent |
-| Faithfulness | 0.77 / 1.0 | Good |
-| Context Precision | 0.52 / 1.0 | Acceptable |
+Each answer is scored by an LLM judge (`gemini-3.1-flash-lite-preview`) on three metrics, using `studybuddy/scripts/evaluate_ragas.py` (3 judge calls per question, 60 in total).
+
+| Metric | Before the fix | After the fix | What it measures |
+|---|---|---|---|
+| Faithfulness | 0.64 | **0.77** | Is every claim in the answer supported by the retrieved chunks? |
+| Answer Relevancy | 0.97 | 0.97 | Does the answer address the question? |
+| Context Precision | 0.48 | 0.52 | Are the retrieved chunks relevant to the question? |
+
+**What changed:** one rule added at the top of the system prompt in `studybuddy/config.py` (commit `3206b14`): *"You must ONLY use information explicitly stated in the provided context chunks. Never use your general training knowledge. If the answer is not in the context, say so explicitly."* Retrieval, ingestion and the evaluation script were not changed.
+
+**Caveats:** one run before and one after. LLM-judge scores vary between runs: context precision, which a prompt change cannot affect, moved by 0.04. So the faithfulness gain (+0.13) is real but approximate. The next improvement is retrieval: a context precision of 0.52 means roughly half of the retrieved chunks are not relevant to the question.
 
 ---
 
@@ -307,7 +313,11 @@ Quiz history is stored in `st.session_state` during a session and persisted to M
 
 ## 🎓 Academic Context
 
-Developed as a comprehensive **final-year Big Data Engineering project at USJ**, DataPilot demonstrates end-to-end full-stack engineering across four disciplines:
+Developed as a **final-year project at USJ** (Bachelor in Mathematics, Data Science option, academic year 2025–2026), supervised by Prof. Celine Semaan, and piloted with 32 registered USJ students.
+
+**Authors:** a final-year project by Elia Khater and Christ Gebrael. Design, code and evaluation by Elia Khater.
+
+DataPilot demonstrates end-to-end full-stack engineering across four disciplines:
 
 - **Prompt Engineering** — Multi-phase system instructions, query classification, academic integrity enforcement, and adaptive quiz generation directives
 - **Database Architecture** — Four-collection MongoDB schema with compound indexes optimised for mastery aggregation queries
